@@ -1,4 +1,3 @@
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -34,6 +33,7 @@ import ProgramaFidelidade from "./pages/ProgramaFidelidade";
 import Idiomas from "./pages/Idiomas";
 import Atividades from "./pages/Atividades";
 import Programas from "./pages/Programas";
+import ChurnPrediction from "./pages/ChurnPrediction";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -83,6 +83,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <PrevisaoEvasao />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/churn-prediction" 
+        element={
+          <ProtectedRoute>
+            <ChurnPrediction />
           </ProtectedRoute>
         } 
       />

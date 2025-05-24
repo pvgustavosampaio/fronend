@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -28,7 +27,8 @@ import {
   Clock,
   Save,
   Puzzle,
-  Gift
+  Gift,
+  Brain
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { 
@@ -50,6 +50,7 @@ const mainItems: SidebarItem[] = [
   { title: 'Painel de Gestão', path: '/painel-gestao', icon: PanelRight },
   { title: 'Alertas Automáticos', path: '/alertas', icon: Bell },
   { title: 'Previsão de Evasão (IA)', path: '/previsao-evasao', icon: TrendingDown },
+  { title: 'Previsão ML', path: '/churn-prediction', icon: Brain },
   { title: 'Análise Preditiva', path: '/analise-preditiva', icon: Activity },
   { title: 'Controle de Frequência', path: '/controle-frequencia', icon: Clock },
   { title: 'Notificações', path: '/notificacoes', icon: Bell },
