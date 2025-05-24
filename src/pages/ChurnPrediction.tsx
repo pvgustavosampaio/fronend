@@ -36,6 +36,7 @@ import {
   Activity,
   BarChart2,
   PieChart as PieChartIcon,
+  Brain,
 } from 'lucide-react';
 import {
   Dialog,
