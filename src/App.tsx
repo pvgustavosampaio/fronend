@@ -8,32 +8,14 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 // Pages
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import PrevisaoEvasao from "./pages/PrevisaoEvasao";
-import AulasTematicasRetro from "./pages/AulasTematicasRetro";
+import Students from "./pages/Students";
+import Attendance from "./pages/Attendance";
+import Payments from "./pages/Payments";
+import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
-import DesignIntuitivo from "./pages/DesignIntuitivo";
-import PlanilhaFaturamento from "./pages/PlanilhaFaturamento";
-import Nutricao from "./pages/Nutricao";
-import Pagamentos from "./pages/Pagamentos";
-import Relatorios from "./pages/Relatorios";
-import AlertasAutomaticos from "./pages/AlertasAutomaticos";
-import PainelGestao from "./pages/PainelGestao";
-import Chatbot from "./pages/Chatbot";
-import GestaoDatabase from "./pages/GestaoDatabase";
-import AnalisePreditiva from "./pages/AnalisePreditiva";
-import Configuracoes from "./pages/Configuracoes";
-import Notificacoes from "./pages/Notificacoes";
-import ControleFrequencia from "./pages/ControleFrequencia";
-import FeedbackAlunos from "./pages/FeedbackAlunos";
-import CronogramaTreinos from "./pages/CronogramaTreinos";
-import AulasSalvas from "./pages/AulasSalvas";
-import IntegracaoAPIs from "./pages/IntegracaoAPIs";
-import Perfil from "./pages/Perfil";
-import ProgramaFidelidade from "./pages/ProgramaFidelidade";
-import Idiomas from "./pages/Idiomas";
-import Atividades from "./pages/Atividades";
-import Programas from "./pages/Programas";
-import ChurnPrediction from "./pages/ChurnPrediction";
+import ImportData from "./pages/ImportData";
+import Alerts from "./pages/Alerts";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -79,206 +61,61 @@ const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/previsao-evasao" 
+        path="/students" 
         element={
           <ProtectedRoute>
-            <PrevisaoEvasao />
+            <Students />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/churn-prediction" 
+        path="/attendance" 
         element={
           <ProtectedRoute>
-            <ChurnPrediction />
+            <Attendance />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/aulas-tematicas" 
+        path="/payments" 
         element={
           <ProtectedRoute>
-            <AulasTematicasRetro />
+            <Payments />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/design-intuitivo" 
+        path="/reports" 
         element={
           <ProtectedRoute>
-            <DesignIntuitivo />
+            <Reports />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/planilha-faturamento" 
+        path="/settings" 
         element={
           <ProtectedRoute>
-            <PlanilhaFaturamento />
+            <Settings />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/pagamentos" 
+        path="/import" 
         element={
           <ProtectedRoute>
-            <Pagamentos />
+            <ImportData />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/nutricao" 
+        path="/alerts" 
         element={
           <ProtectedRoute>
-            <Nutricao />
+            <Alerts />
           </ProtectedRoute>
         } 
       />
-      <Route 
-        path="/relatorios" 
-        element={
-          <ProtectedRoute>
-            <Relatorios />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/alertas" 
-        element={
-          <ProtectedRoute>
-            <AlertasAutomaticos />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/painel-gestao" 
-        element={
-          <ProtectedRoute>
-            <PainelGestao />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/chatbot" 
-        element={
-          <ProtectedRoute>
-            <Chatbot />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/gestao-dados" 
-        element={
-          <ProtectedRoute>
-            <GestaoDatabase />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/analise-preditiva" 
-        element={
-          <ProtectedRoute>
-            <AnalisePreditiva />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/configuracoes" 
-        element={
-          <ProtectedRoute>
-            <Configuracoes />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/notificacoes" 
-        element={
-          <ProtectedRoute>
-            <Notificacoes />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/controle-frequencia" 
-        element={
-          <ProtectedRoute>
-            <ControleFrequencia />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/feedback" 
-        element={
-          <ProtectedRoute>
-            <FeedbackAlunos />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/cronograma-treinos" 
-        element={
-          <ProtectedRoute>
-            <CronogramaTreinos />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/aulas-salvas" 
-        element={
-          <ProtectedRoute>
-            <AulasSalvas />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/integracao-apis" 
-        element={
-          <ProtectedRoute>
-            <IntegracaoAPIs />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/idiomas" 
-        element={
-          <ProtectedRoute>
-            <Idiomas />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/perfil" 
-        element={
-          <ProtectedRoute>
-            <Perfil />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/programa-fidelidade" 
-        element={
-          <ProtectedRoute>
-            <ProgramaFidelidade />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/atividades" 
-        element={
-          <ProtectedRoute>
-            <Atividades />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/programas" 
-        element={
-          <ProtectedRoute>
-            <Programas />
-          </ProtectedRoute>
-        } 
-      />
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
