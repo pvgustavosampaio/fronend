@@ -1,6 +1,12 @@
 // Follow Deno edge function patterns
 import { createClient } from "npm:@supabase/supabase-js@2.39.8";
-import { corsHeaders } from "../_shared/cors.ts";
+
+// Define CORS headers directly in the function since shared module is not accessible
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+};
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
