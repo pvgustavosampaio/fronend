@@ -34,6 +34,9 @@ import Idiomas from "./pages/Idiomas";
 import Atividades from "./pages/Atividades";
 import Programas from "./pages/Programas";
 import ChurnPrediction from "./pages/ChurnPrediction";
+import Onboarding from "./pages/Onboarding";
+import ImportData from "./pages/ImportData";
+import Settings from "./pages/Settings";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -58,7 +61,10 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const AppRoutes = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  
+  // Check if user has completed onboarding
+  const hasCompletedOnboarding = localStorage.getItem('onboarding_completed') === 'true';
   
   return (
     <Routes>
@@ -68,13 +74,27 @@ const AppRoutes = () => {
       />
       <Route 
         path="/" 
-        element={<Navigate to="/dashboard" replace />} 
+        element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} 
+      />
+      <Route 
+        path="/onboarding" 
+        element={
+          isAuthenticated ? (
+            hasCompletedOnboarding ? <Navigate to="/dashboard" replace /> : <Onboarding />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } 
       />
       <Route 
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <Dashboard />
+            {!hasCompletedOnboarding && user?.role === 'admin' ? (
+              <Navigate to="/onboarding" replace />
+            ) : (
+              <Dashboard />
+            )}
           </ProtectedRoute>
         } 
       />
@@ -275,6 +295,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Programas />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/importar-dados" 
+        element={
+          <ProtectedRoute>
+            <ImportData />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/configuracoes-sistema" 
+        element={
+          <ProtectedRoute>
+            <Settings />
           </ProtectedRoute>
         } 
       />

@@ -28,7 +28,9 @@ import {
   Save,
   Puzzle,
   Gift,
-  Brain
+  Brain,
+  Upload,
+  Cog
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { 
@@ -43,6 +45,7 @@ type SidebarItem = {
   title: string;
   path: string;
   icon: React.ElementType;
+  role?: string[];
 };
 
 const mainItems: SidebarItem[] = [
@@ -54,11 +57,9 @@ const mainItems: SidebarItem[] = [
   { title: 'Análise Preditiva', path: '/analise-preditiva', icon: Activity },
   { title: 'Controle de Frequência', path: '/controle-frequencia', icon: Clock },
   { title: 'Notificações', path: '/notificacoes', icon: Bell },
-  { title: 'Gestão de Dados', path: '/gestao-dados', icon: Database },
   { title: 'Chatbot Inteligente', path: '/chatbot', icon: Hexagon },
   { title: 'Plataforma de Pagamentos', path: '/pagamentos', icon: FileSpreadsheet },
   { title: 'Feedback de Alunos', path: '/feedback', icon: HeartPulse },
-  { title: 'Integração com APIs', path: '/integracao-apis', icon: Puzzle },
   { title: 'Programa de Fidelidade', path: '/programa-fidelidade', icon: Gift },
   { title: 'Comunicação', path: '/chatbot', icon: MessageCircle },
   { title: 'Treinos e Aulas Temáticas', path: '/aulas-tematicas', icon: Award },
@@ -68,7 +69,11 @@ const mainItems: SidebarItem[] = [
   { title: 'Programas', path: '/programas', icon: Award },
   { title: 'Relatórios', path: '/relatorios', icon: ChartBar },
   { title: 'Planilha e Faturamento', path: '/planilha-faturamento', icon: DollarSign },
-  { title: 'Idiomas', path: '/idiomas', icon: Globe },
+];
+
+const adminItems: SidebarItem[] = [
+  { title: 'Importar Dados', path: '/importar-dados', icon: Upload, role: ['admin'] },
+  { title: 'Configurações do Sistema', path: '/configuracoes-sistema', icon: Cog, role: ['admin'] },
 ];
 
 const bottomItems: SidebarItem[] = [
@@ -132,6 +137,12 @@ const Sidebar: React.FC<{ collapsed: boolean; setCollapsed: (value: boolean) => 
 }) => {
   const location = useLocation();
   const { user } = useAuth();
+  
+  // Filter items based on user role
+  const filteredAdminItems = adminItems.filter(item => {
+    if (!item.role) return true;
+    return item.role.includes(user?.role || '');
+  });
 
   return (
     <motion.div 
@@ -168,6 +179,15 @@ const Sidebar: React.FC<{ collapsed: boolean; setCollapsed: (value: boolean) => 
           {mainItems.map((item) => (
             <SidebarItem key={item.path} item={item} collapsed={collapsed} />
           ))}
+          
+          {filteredAdminItems.length > 0 && (
+            <>
+              <div className="my-2 border-t border-border"></div>
+              {filteredAdminItems.map((item) => (
+                <SidebarItem key={item.path} item={item} collapsed={collapsed} />
+              ))}
+            </>
+          )}
         </div>
       </div>
 
