@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,7 +7,7 @@ type User = {
   name: string;
   email: string;
   role: string;
-  schoolName?: string;
+  academyName?: string;
 };
 
 interface AuthContextType {
@@ -26,7 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Check if user exists in localStorage
-    const storedUser = localStorage.getItem('school_user');
+    const storedUser = localStorage.getItem('academy_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
@@ -47,14 +48,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const mockUser: User = {
         id: '1',
-        name: 'Administrador',
+        name: 'Gestora Academia',
         email,
         role: 'admin',
-        schoolName: 'Escola Modelo'
+        academyName: 'Academia Força Local'
       };
       
       setUser(mockUser);
-      localStorage.setItem('school_user', JSON.stringify(mockUser));
+      localStorage.setItem('academy_user', JSON.stringify(mockUser));
       navigate('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
@@ -66,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('school_user');
+    localStorage.removeItem('academy_user');
     navigate('/login');
   };
 

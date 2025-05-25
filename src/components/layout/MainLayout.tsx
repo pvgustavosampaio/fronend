@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from './Sidebar';
@@ -43,7 +44,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               <input 
                 type="text" 
                 placeholder="Buscar..." 
-                className="pl-8 py-1 pr-4 bg-secondary rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="pl-8 py-1 pr-4 bg-secondary rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-academy-purple"
               />
             </div>
             
@@ -53,7 +54,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative rounded-full h-8 w-8 bg-primary">
+                <Button variant="ghost" className="relative rounded-full h-8 w-8 bg-academy-purple">
                   <span className="sr-only">Perfil</span>
                   <span className="text-white font-medium">
                     {user?.name?.charAt(0) || 'U'}
