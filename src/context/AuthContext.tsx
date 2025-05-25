@@ -188,20 +188,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               email,
               name,
               role: 'admin', // First user is admin
-              academy_name: 'Minha Academia' // Default name
+              academy_name: 'Minha Academia', // Default name
+              status: 'Ativo'
             }
           ])
-          .select()
-          .single();
+          .select();
         
         if (userError) throw userError;
         
         const authUser: User = {
-          id: userData.id,
-          name: userData.name,
-          email: userData.email,
-          role: userData.role,
-          academyName: userData.academy_name
+          id: userData[0].id,
+          name: userData[0].name,
+          email: userData[0].email,
+          role: userData[0].role,
+          academyName: userData[0].academy_name
         };
         
         setUser(authUser);

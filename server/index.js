@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Import routes
 import dashboardRoutes from './routes/dashboardRoutes.js';
@@ -44,9 +46,16 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Get current file directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
 app.use('/api/dashboard', authenticateToken, dashboardRoutes);
@@ -57,7 +66,7 @@ app.use('/api/ml-prediction', authenticateToken, mlPredictionRoutes);
 app.use('/api/analysis', authenticateToken, analysisRoutes);
 app.use('/api/attendance', authenticateToken, attendanceRoutes);
 app.use('/api/notifications', authenticateToken, notificationsRoutes);
-app.use('/api/data-management', authenticateToken, dataManagementRoutes);
+app.use('/api/data-management', dataManagementRoutes);
 app.use('/api/chatbot', authenticateToken, chatbotRoutes);
 app.use('/api/payments', authenticateToken, paymentsRoutes);
 app.use('/api/feedback', authenticateToken, feedbackRoutes);

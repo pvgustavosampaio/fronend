@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowUpDown, 
   Search, 
@@ -7,7 +6,10 @@ import {
   Plus, 
   Filter, 
   CalendarCheck, 
-  DollarSign 
+  DollarSign,
+  Trash,
+  Edit,
+  AlertTriangle
 } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import { 
@@ -46,6 +48,15 @@ import {
   BarChart,
   Bar
 } from 'recharts';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { supabase } from '@/integrations/supabase/client';
 
 // Dados de exemplo para a tabela
 const studentData = [
@@ -53,71 +64,78 @@ const studentData = [
     id: 1, 
     name: "Ana Silva", 
     photo: "https://i.pravatar.cc/150?img=1", 
-    plan: "Premium", 
-    status: "Ativo", 
+    attendance: 85, 
     lastPayment: "2024-05-10", 
+    status: "Ativo", 
     value: 120, 
-    nextPayment: "2024-06-10" 
+    nextPayment: "2024-06-10",
+    expanded: false
   },
   { 
     id: 2, 
     name: "Carlos Oliveira", 
     photo: "https://i.pravatar.cc/150?img=2", 
-    plan: "Básico", 
-    status: "Atrasado", 
+    attendance: 62, 
     lastPayment: "2024-04-05", 
+    status: "Atrasado", 
     value: 80, 
-    nextPayment: "2024-05-05" 
+    nextPayment: "2024-05-05",
+    expanded: false
   },
   { 
     id: 3, 
     name: "Mariana Costa", 
     photo: "https://i.pravatar.cc/150?img=3", 
-    plan: "Mensal", 
-    status: "Ativo", 
+    attendance: 93, 
     lastPayment: "2024-05-15", 
+    status: "Ativo", 
     value: 100, 
-    nextPayment: "2024-06-15" 
+    nextPayment: "2024-06-15",
+    expanded: false
   },
   { 
     id: 4, 
     name: "Pedro Santos", 
     photo: "https://i.pravatar.cc/150?img=4", 
-    plan: "Premium", 
-    status: "Pendente", 
+    attendance: 70, 
     lastPayment: "2024-04-20", 
+    status: "Pendente", 
     value: 120, 
-    nextPayment: "2024-05-20" 
+    nextPayment: "2024-05-20",
+    expanded: false
   },
   { 
     id: 5, 
     name: "Juliana Mendes", 
     photo: "https://i.pravatar.cc/150?img=5", 
-    plan: "Anual", 
-    status: "Ativo", 
+    attendance: 95, 
     lastPayment: "2024-01-10", 
+    status: "Ativo", 
     value: 1100, 
-    nextPayment: "2025-01-10" 
+    nextPayment: "2025-01-10",
+    expanded: false
   },
   { 
     id: 6, 
     name: "Roberto Almeida", 
     photo: "https://i.pravatar.cc/150?img=6", 
-    plan: "Trimestral", 
-    status: "Inativo", 
+    attendance: 45, 
     lastPayment: "2024-02-15", 
+    status: "Inativo", 
     value: 280, 
-    nextPayment: "2024-05-15" 
+    nextPayment: "2024-05-15",
+    expanded: false
   },
   { 
     id: 7, 
     name: "Fernanda Lima", 
     photo: "https://i.pravatar.cc/150?img=7", 
-    plan: "Mensal", 
-    status: "Ativo", 
+    attendance: 88, 
     lastPayment: "2024-05-08", 
+    status: "Ativo", 
     value: 100, 
-    nextPayment: "2024-06-08" 
+    nextPayment: "2024-06-08",
+    expanded: false
   },
 ];
 
@@ -129,12 +147,6 @@ const revenueData = [
   { month: 'Abr', value: 25000 },
   { month: 'Mai', value: 28000 },
   { month: 'Jun', value: 30000 },
-  { month: 'Jul', value: 32000 },
-  { month: 'Ago', value: 31000 },
-  { month: 'Set', value: 33000 },
-  { month: 'Out', value: 35000 },
-  { month: 'Nov', value: 37000 },
-  { month: 'Dez', value: 40000 },
 ];
 
 // Dados de exemplo para o gráfico de pagamentos por status
@@ -147,14 +159,52 @@ const paymentStatusData = [
 const PlanilhaFaturamento = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [paymentPlans, setPaymentPlans] = useState([]);
+  const [showPlanDialog, setShowPlanDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [newPlan, setNewPlan] = useState({
+    name: '',
+    price: '',
+    description: '',
+    duration_days: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Fetch payment plans on component mount
+  useEffect(() => {
+    fetchPaymentPlans();
+  }, []);
+
+  const fetchPaymentPlans = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('payment_plans')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      setPaymentPlans(data || []);
+    } catch (error) {
+      console.error('Error fetching payment plans:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao carregar planos",
+        description: "Não foi possível carregar os planos de pagamento."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Função para filtrar e ordenar os dados
   const filteredAndSortedData = studentData
     .filter(student => 
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.plan.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.status.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
@@ -172,7 +222,7 @@ const PlanilhaFaturamento = () => {
     });
 
   // Função para mudar a ordenação
-  const handleSort = (column: string) => {
+  const handleSort = (column) => {
     if (sortBy === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -182,7 +232,7 @@ const PlanilhaFaturamento = () => {
   };
 
   // Função para formatar data
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
   };
@@ -204,7 +254,7 @@ const PlanilhaFaturamento = () => {
   };
 
   // Função para gerenciar pagamento
-  const managePayment = (studentId: number) => {
+  const managePayment = (studentId) => {
     toast({
       title: "Gerenciar pagamento",
       description: `Gerenciando pagamento do aluno #${studentId}`,
@@ -217,12 +267,12 @@ const PlanilhaFaturamento = () => {
   const pendingPayments = studentData.filter(student => student.status === 'Atrasado' || student.status === 'Pendente').length;
 
   // Função para formatar valores como moeda
-  const formatCurrency = (value: number) => {
+  const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
 
   // Customização do tooltip do gráfico
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       // Fix for TypeScript error - check if payload[0].value is a number before calling toFixed
       const value = payload[0].value;
@@ -235,6 +285,184 @@ const PlanilhaFaturamento = () => {
       );
     }
     return null;
+  };
+
+  // Handle creating a new payment plan
+  const handleCreatePlan = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Validate inputs
+      if (!newPlan.name || !newPlan.price || !newPlan.duration_days) {
+        toast({
+          variant: "destructive",
+          title: "Campos obrigatórios",
+          description: "Por favor, preencha todos os campos obrigatórios."
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Create new plan
+      const { data, error } = await supabase
+        .from('payment_plans')
+        .insert({
+          name: newPlan.name,
+          price: parseFloat(newPlan.price),
+          description: newPlan.description,
+          duration_days: parseInt(newPlan.duration_days),
+          academy_id: user.id
+        })
+        .select();
+      
+      if (error) throw error;
+      
+      // Reset form and close dialog
+      setNewPlan({
+        name: '',
+        price: '',
+        description: '',
+        duration_days: ''
+      });
+      setShowPlanDialog(false);
+      
+      // Refresh plans list
+      fetchPaymentPlans();
+      
+      toast({
+        title: "Plano criado",
+        description: "O plano de pagamento foi criado com sucesso."
+      });
+    } catch (error) {
+      console.error('Error creating payment plan:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao criar plano",
+        description: error.message || "Não foi possível criar o plano de pagamento."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle editing a payment plan
+  const handleEditPlan = (plan) => {
+    setSelectedPlan(plan);
+    setNewPlan({
+      name: plan.name,
+      price: plan.price.toString(),
+      description: plan.description || '',
+      duration_days: plan.duration_days.toString()
+    });
+    setShowPlanDialog(true);
+  };
+
+  // Handle updating a payment plan
+  const handleUpdatePlan = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Validate inputs
+      if (!newPlan.name || !newPlan.price || !newPlan.duration_days) {
+        toast({
+          variant: "destructive",
+          title: "Campos obrigatórios",
+          description: "Por favor, preencha todos os campos obrigatórios."
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Update plan
+      const { data, error } = await supabase
+        .from('payment_plans')
+        .update({
+          name: newPlan.name,
+          price: parseFloat(newPlan.price),
+          description: newPlan.description,
+          duration_days: parseInt(newPlan.duration_days),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedPlan.id)
+        .select();
+      
+      if (error) throw error;
+      
+      // Reset form and close dialog
+      setNewPlan({
+        name: '',
+        price: '',
+        description: '',
+        duration_days: ''
+      });
+      setSelectedPlan(null);
+      setShowPlanDialog(false);
+      
+      // Refresh plans list
+      fetchPaymentPlans();
+      
+      toast({
+        title: "Plano atualizado",
+        description: "O plano de pagamento foi atualizado com sucesso."
+      });
+    } catch (error) {
+      console.error('Error updating payment plan:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar plano",
+        description: error.message || "Não foi possível atualizar o plano de pagamento."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle deleting a payment plan
+  const handleDeletePlan = async () => {
+    try {
+      setIsLoading(true);
+      
+      const { error } = await supabase
+        .from('payment_plans')
+        .delete()
+        .eq('id', selectedPlan.id);
+      
+      if (error) throw error;
+      
+      // Reset and close dialog
+      setSelectedPlan(null);
+      setShowDeleteDialog(false);
+      
+      // Refresh plans list
+      fetchPaymentPlans();
+      
+      toast({
+        title: "Plano excluído",
+        description: "O plano de pagamento foi excluído com sucesso."
+      });
+    } catch (error) {
+      console.error('Error deleting payment plan:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir plano",
+        description: error.message || "Não foi possível excluir o plano de pagamento."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle confirming plan deletion
+  const confirmDeletePlan = (plan) => {
+    setSelectedPlan(plan);
+    setShowDeleteDialog(true);
   };
 
   return (
@@ -285,8 +513,105 @@ const PlanilhaFaturamento = () => {
         </Card>
       </div>
 
+      {/* Planos de Pagamento */}
+      <Card className="mb-6 bg-transparent glass-morphism">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg flex items-center">
+              <DollarSign className="mr-2 h-5 w-5 text-academy-purple" />
+              Planos de Pagamento
+            </CardTitle>
+            <Button 
+              size="sm" 
+              onClick={() => {
+                setSelectedPlan(null);
+                setNewPlan({
+                  name: '',
+                  price: '',
+                  description: '',
+                  duration_days: ''
+                });
+                setShowPlanDialog(true);
+              }}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Novo Plano
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : paymentPlans.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <DollarSign className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p>Nenhum plano de pagamento encontrado</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-4"
+                onClick={() => {
+                  setSelectedPlan(null);
+                  setNewPlan({
+                    name: '',
+                    price: '',
+                    description: '',
+                    duration_days: ''
+                  });
+                  setShowPlanDialog(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Adicionar Plano
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {paymentPlans.map((plan) => (
+                <div 
+                  key={plan.id} 
+                  className="p-4 border border-border rounded-lg hover:border-primary transition-colors"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium">{plan.name}</h3>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7"
+                        onClick={() => handleEditPlan(plan)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-100"
+                        onClick={() => confirmDeletePlan(plan)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-xl font-bold mb-1">{formatCurrency(plan.price)}</div>
+                  <div className="text-sm text-muted-foreground mb-2">
+                    Duração: {plan.duration_days} dias
+                  </div>
+                  {plan.description && (
+                    <p className="text-sm text-muted-foreground">{plan.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Gráfico 1 - Tendência de Receita */}
         <Card className="lg:col-span-2 bg-transparent glass-morphism">
           <CardHeader>
             <CardTitle>Receita Mensal</CardTitle>
@@ -313,6 +638,7 @@ const PlanilhaFaturamento = () => {
           </CardContent>
         </Card>
 
+        {/* Gráfico 2 - Status de Pagamentos */}
         <Card className="bg-transparent glass-morphism">
           <CardHeader>
             <CardTitle>Status de Pagamentos</CardTitle>
@@ -472,6 +798,142 @@ const PlanilhaFaturamento = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog for creating/editing payment plans */}
+      <Dialog open={showPlanDialog} onOpenChange={setShowPlanDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedPlan ? 'Editar Plano' : 'Novo Plano de Pagamento'}</DialogTitle>
+            <DialogDescription>
+              {selectedPlan 
+                ? 'Edite as informações do plano de pagamento' 
+                : 'Preencha as informações para criar um novo plano de pagamento'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium">Nome do Plano *</label>
+              <Input 
+                id="name" 
+                value={newPlan.name} 
+                onChange={(e) => setNewPlan({...newPlan, name: e.target.value})} 
+                placeholder="Ex: Plano Mensal"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="price" className="text-sm font-medium">Preço (R$) *</label>
+              <Input 
+                id="price" 
+                type="number" 
+                step="0.01" 
+                min="0" 
+                value={newPlan.price} 
+                onChange={(e) => setNewPlan({...newPlan, price: e.target.value})} 
+                placeholder="Ex: 99.90"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="duration" className="text-sm font-medium">Duração (dias) *</label>
+              <Input 
+                id="duration" 
+                type="number" 
+                min="1" 
+                value={newPlan.duration_days} 
+                onChange={(e) => setNewPlan({...newPlan, duration_days: e.target.value})} 
+                placeholder="Ex: 30"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="description" className="text-sm font-medium">Descrição</label>
+              <Input 
+                id="description" 
+                value={newPlan.description} 
+                onChange={(e) => setNewPlan({...newPlan, description: e.target.value})} 
+                placeholder="Ex: Acesso ilimitado por 30 dias"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowPlanDialog(false);
+                setSelectedPlan(null);
+                setNewPlan({
+                  name: '',
+                  price: '',
+                  description: '',
+                  duration_days: ''
+                });
+              }}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={selectedPlan ? handleUpdatePlan : handleCreatePlan}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="animate-spin">⏳</span>
+              ) : selectedPlan ? (
+                'Atualizar Plano'
+              ) : (
+                'Criar Plano'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation dialog for deleting plans */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir o plano "{selectedPlan?.name}"? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex items-center p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-500 mr-3" />
+            <div>
+              <p className="font-medium text-red-500">Atenção</p>
+              <p className="text-sm">A exclusão deste plano pode afetar alunos que já o utilizam.</p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setSelectedPlan(null);
+              }}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDeletePlan}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="animate-spin">⏳</span>
+              ) : (
+                'Excluir Plano'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 };

@@ -1,11 +1,16 @@
 import { supabase } from '../index.js';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// Get current file directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Get all templates
 export const getAllTemplates = async (req, res, next) => {
   try {
-    const templatesDir = path.resolve(process.cwd(), 'public', 'templates');
+    const templatesDir = path.resolve(__dirname, '../../public/templates');
     
     // Check if directory exists
     if (!fs.existsSync(templatesDir)) {
@@ -76,6 +81,41 @@ export const getDataSchema = async (req, res, next) => {
         ],
         relationships: [
           { table: 'users', column: 'user_id', foreignColumn: 'id' }
+        ]
+      },
+      payment_plans: {
+        columns: [
+          { name: 'id', type: 'uuid', nullable: false },
+          { name: 'name', type: 'text', nullable: false },
+          { name: 'price', type: 'numeric', nullable: false },
+          { name: 'description', type: 'text', nullable: true },
+          { name: 'duration_days', type: 'integer', nullable: false },
+          { name: 'is_active', type: 'boolean', nullable: false },
+          { name: 'created_at', type: 'timestamp', nullable: true },
+          { name: 'updated_at', type: 'timestamp', nullable: true },
+          { name: 'academy_id', type: 'uuid', nullable: false }
+        ],
+        relationships: [
+          { table: 'users', column: 'academy_id', foreignColumn: 'id' }
+        ]
+      },
+      class_schedules: {
+        columns: [
+          { name: 'id', type: 'uuid', nullable: false },
+          { name: 'name', type: 'text', nullable: false },
+          { name: 'instructor', type: 'text', nullable: true },
+          { name: 'day_of_week', type: 'text', nullable: false },
+          { name: 'start_time', type: 'time', nullable: false },
+          { name: 'end_time', type: 'time', nullable: false },
+          { name: 'capacity', type: 'integer', nullable: false },
+          { name: 'location', type: 'text', nullable: true },
+          { name: 'is_active', type: 'boolean', nullable: false },
+          { name: 'created_at', type: 'timestamp', nullable: true },
+          { name: 'updated_at', type: 'timestamp', nullable: true },
+          { name: 'academy_id', type: 'uuid', nullable: false }
+        ],
+        relationships: [
+          { table: 'users', column: 'academy_id', foreignColumn: 'id' }
         ]
       }
     };
