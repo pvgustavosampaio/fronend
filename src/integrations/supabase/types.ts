@@ -351,6 +351,9 @@ export type Database = {
           gender: string | null
           id: string
           name: string
+          role: string
+          academy_name: string | null
+          status: string | null
         }
         Insert: {
           age?: number | null
@@ -359,6 +362,9 @@ export type Database = {
           gender?: string | null
           id?: string
           name: string
+          role?: string
+          academy_name?: string | null
+          status?: string | null
         }
         Update: {
           age?: number | null
@@ -367,8 +373,139 @@ export type Database = {
           gender?: string | null
           id?: string
           name?: string
+          role?: string
+          academy_name?: string | null
+          status?: string | null
         }
         Relationships: []
+      }
+      churn_predictions: {
+        Row: {
+          id: string
+          user_id: string | null
+          prediction_date: string | null
+          churn_probability: number
+          confidence_score: number
+          risk_level: string
+          factors: Json | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          prediction_date?: string | null
+          churn_probability: number
+          confidence_score: number
+          risk_level: string
+          factors?: Json | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          prediction_date?: string | null
+          churn_probability?: number
+          confidence_score?: number
+          risk_level?: string
+          factors?: Json | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "churn_predictions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      churn_model_metrics: {
+        Row: {
+          id: string
+          training_date: string | null
+          accuracy: number
+          precision: number
+          recall: number
+          f1_score: number
+          feature_importance: Json | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          training_date?: string | null
+          accuracy: number
+          precision: number
+          recall: number
+          f1_score: number
+          feature_importance?: Json | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          training_date?: string | null
+          accuracy?: number
+          precision?: number
+          recall?: number
+          f1_score?: number
+          feature_importance?: Json | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      churn_actions: {
+        Row: {
+          id: string
+          user_id: string | null
+          prediction_id: string | null
+          action_type: string
+          action_description: string | null
+          status: string
+          assigned_to: string | null
+          result: string | null
+          created_at: string | null
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          prediction_id?: string | null
+          action_type: string
+          action_description?: string | null
+          status?: string
+          assigned_to?: string | null
+          result?: string | null
+          created_at?: string | null
+          completed_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          prediction_id?: string | null
+          action_type?: string
+          action_description?: string | null
+          status?: string
+          assigned_to?: string | null
+          result?: string | null
+          created_at?: string | null
+          completed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "churn_actions_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "churn_predictions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "churn_actions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
