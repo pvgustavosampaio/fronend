@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,14 @@ import {
   Plus,
   MoreHorizontal
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface SavedClass {
   id: string;
@@ -95,17 +102,19 @@ const AulasSalvas = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'aulas' | 'conquistas'>('aulas');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [classToDelete, setClassToDelete] = useState<SavedClass | null>(null);
 
   const completedCount = classes.filter(c => c.completed).length;
   const totalCount = classes.length;
-  const completionPercentage = Math.round((completedCount / totalCount) * 100);
+  const completionPercentage = Math.round((completedCount / totalCount) * 100) || 0;
 
   const filteredClasses = classes.filter(classe => {
     const matchesSearch = classe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          classe.instructor.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = selectedFilter === 'all' || 
-                         (selectedFilter === 'completed' && classe.completed) ||
                          (selectedFilter === 'pending' && !classe.completed) ||
+                         (selectedFilter === 'completed' && classe.completed) ||
                          classe.type.toLowerCase() === selectedFilter.toLowerCase();
     
     return matchesSearch && matchesFilter;
@@ -119,6 +128,7 @@ const AulasSalvas = () => {
     const classe = classes.find(c => c.id === id);
     if (classe) {
       toast({
+        title: `Presença atualizada`,
         description: classe.completed ? 
           `"${classe.name}" marcada como pendente` : 
           `"${classe.name}" marcada como concluída!`
@@ -126,14 +136,22 @@ const AulasSalvas = () => {
     }
   };
 
-  const handleDeleteClass = (id: string) => {
-    const classe = classes.find(c => c.id === id);
-    setClasses(prev => prev.filter(c => c.id !== id));
+  const handleDeleteClass = () => {
+    if (!classToDelete) return;
+    
+    setClasses(prev => prev.filter(c => c.id !== classToDelete.id));
+    setShowDeleteDialog(false);
+    setClassToDelete(null);
     
     toast({
       title: "Aula removida",
-      description: `"${classe?.name}" foi excluída das aulas salvas`
+      description: `"${classToDelete.name}" foi excluída das aulas salvas`
     });
+  };
+
+  const handleConfirmDelete = (classe: SavedClass) => {
+    setClassToDelete(classe);
+    setShowDeleteDialog(true);
   };
 
   const handleEditClass = (id: string) => {
@@ -342,7 +360,7 @@ const AulasSalvas = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDeleteClass(classe.id)}
+                      onClick={() => handleConfirmDelete(classe)}
                       className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -415,6 +433,38 @@ const AulasSalvas = () => {
             Nova Aula
           </Button>
         </motion.div>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar exclusão</DialogTitle>
+              <DialogDescription>
+                Tem certeza que deseja excluir esta aula? Esta ação não pode ser desfeita.
+              </DialogDescription>
+            </DialogHeader>
+            
+            {classToDelete && (
+              <div className="py-4">
+                <div className="p-4 border rounded-lg">
+                  <h3 className="font-medium">{classToDelete.name}</h3>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {classToDelete.instructor} • {classToDelete.time} • {classToDelete.duration} min
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteClass}>
+                Excluir
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MainLayout from '@/components/layout/MainLayout';
@@ -134,6 +133,7 @@ const CronogramaTreinos = () => {
   const [diaAtual, setDiaAtual] = useState<string>('seg');
   const [modalNovoTreino, setModalNovoTreino] = useState(false);
   const [modalDetalhesTreino, setModalDetalhesTreino] = useState(false);
+  const [modalRemoverTreino, setModalRemoverTreino] = useState(false);
   const [treinoAtual, setTreinoAtual] = useState<Treino | null>(null);
   const [novoTreino, setNovoTreino] = useState({
     nome: '',
@@ -201,11 +201,17 @@ const CronogramaTreinos = () => {
   const handleExcluirTreino = (id: string) => {
     setTreinos(treinos.filter(t => t.id !== id));
     setModalDetalhesTreino(false);
+    setModalRemoverTreino(false);
     
     toast({
       title: "Treino removido",
       description: "O treino foi removido do cronograma."
     });
+  };
+  
+  const handleConfirmarRemocao = () => {
+    setModalDetalhesTreino(false);
+    setModalRemoverTreino(true);
   };
   
   const handlePromoverTreino = (id: string) => {
@@ -840,7 +846,7 @@ const CronogramaTreinos = () => {
                     variant="outline" 
                     size="sm"
                     className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
-                    onClick={() => handleExcluirTreino(treinoAtual.id)}
+                    onClick={handleConfirmarRemocao}
                   >
                     <Trash className="h-3.5 w-3.5 mr-1" />
                     Excluir
@@ -874,6 +880,52 @@ const CronogramaTreinos = () => {
                     </Button>
                   </div>
                 </div>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal - Confirmar remoção de treino */}
+      <Dialog open={modalRemoverTreino} onOpenChange={setModalRemoverTreino}>
+        <DialogContent className="sm:max-w-md">
+          {treinoAtual && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-destructive">Confirmar Exclusão</DialogTitle>
+              </DialogHeader>
+              
+              <div className="py-4">
+                <p className="mb-4">
+                  Tem certeza que deseja excluir a aula <strong>{treinoAtual.nome}</strong> de {diasDaSemana.find(d => d.codigo === treinoAtual.dia)?.nome} às {treinoAtual.horario}?
+                </p>
+                
+                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-destructive">Atenção</p>
+                      <p className="text-sm text-destructive/80">
+                        Esta ação não pode ser desfeita. Os alunos inscritos nesta aula serão notificados do cancelamento.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setModalRemoverTreino(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  variant="destructive"
+                  onClick={() => handleExcluirTreino(treinoAtual.id)}
+                >
+                  Confirmar Exclusão
+                </Button>
               </DialogFooter>
             </>
           )}

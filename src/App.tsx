@@ -70,7 +70,7 @@ const AppRoutes = () => {
     <Routes>
       <Route 
         path="/login" 
-        element={isAuthenticated ? <Navigate to="/dashboard\" replace /> : <Login />} 
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
       />
       <Route 
         path="/" 
@@ -80,7 +80,7 @@ const AppRoutes = () => {
         path="/onboarding" 
         element={
           isAuthenticated ? (
-            hasCompletedOnboarding ? <Navigate to="/dashboard\" replace /> : <Onboarding />
+            hasCompletedOnboarding ? <Navigate to="/dashboard" replace /> : <Onboarding />
           ) : (
             <Navigate to="/login" replace />
           )
@@ -91,7 +91,7 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             {!hasCompletedOnboarding && user?.role === 'admin' ? (
-              <Navigate to="/onboarding\" replace />
+              <Navigate to="/onboarding" replace />
             ) : (
               <Dashboard />
             )}
