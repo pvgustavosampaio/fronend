@@ -12,7 +12,8 @@ import {
   Users, 
   Calendar, 
   DollarSign,
-  CheckCircle
+  CheckCircle,
+  Trash2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -202,6 +203,21 @@ const Onboarding = () => {
     }
   };
 
+  const handleRemovePlan = (index) => {
+    setAcademyData(prev => {
+      const updatedPlans = [...prev.plans];
+      updatedPlans.splice(index, 1);
+      return {
+        ...prev,
+        plans: updatedPlans
+      };
+    });
+    
+    toast({
+      description: "Plano removido com sucesso"
+    });
+  };
+
   const saveAcademyData = async () => {
     setLoading(true);
     try {
@@ -227,21 +243,6 @@ const Onboarding = () => {
     }
   };
 
-  const handleRemovePlan = (index) => {
-    setAcademyData(prev => {
-      const updatedPlans = [...prev.plans];
-      updatedPlans.splice(index, 1);
-      return {
-        ...prev,
-        plans: updatedPlans
-      };
-    });
-    
-    toast({
-      description: "Plano removido com sucesso"
-    });
-  };
-
   const renderStepContent = () => {
     switch (steps[currentStep].id) {
       case 'welcome':
@@ -262,17 +263,17 @@ const Onboarding = () => {
             </motion.div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto mt-8">
-              <div className="p-4 bg-secondary/20 rounded-lg">
+              <div className="space-y-2">
                 <Users className="w-8 h-8 text-academy-purple mb-2" />
                 <h3 className="font-medium">Gestão de Alunos</h3>
                 <p className="text-sm text-muted-foreground">Controle completo dos seus alunos e suas atividades</p>
               </div>
-              <div className="p-4 bg-secondary/20 rounded-lg">
+              <div className="space-y-2">
                 <DollarSign className="w-8 h-8 text-academy-purple mb-2" />
                 <h3 className="font-medium">Controle Financeiro</h3>
                 <p className="text-sm text-muted-foreground">Gerencie pagamentos e mensalidades facilmente</p>
               </div>
-              <div className="p-4 bg-secondary/20 rounded-lg">
+              <div className="space-y-2">
                 <Calendar className="w-8 h-8 text-academy-purple mb-2" />
                 <h3 className="font-medium">Agendamento</h3>
                 <p className="text-sm text-muted-foreground">Organize aulas e horários de forma eficiente</p>
