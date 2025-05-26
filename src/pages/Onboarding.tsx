@@ -141,6 +141,7 @@ const Onboarding = () => {
 
     if (currentStep === 5) {
       // Finish onboarding and redirect to dashboard
+      localStorage.setItem('onboarding_completed', 'true');
       navigate('/dashboard');
       return;
     }
@@ -209,6 +210,7 @@ const Onboarding = () => {
       
       setTimeout(() => {
         setLoading(false);
+        localStorage.setItem('onboarding_completed', 'true');
         toast({
           title: "Configuração concluída",
           description: "Sua academia foi configurada com sucesso!"
