@@ -210,7 +210,6 @@ const Onboarding = () => {
       
       setTimeout(() => {
         setLoading(false);
-        localStorage.setItem('onboarding_completed', 'true');
         toast({
           title: "Configuração concluída",
           description: "Sua academia foi configurada com sucesso!"
@@ -226,6 +225,21 @@ const Onboarding = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleRemovePlan = (index) => {
+    setAcademyData(prev => {
+      const updatedPlans = [...prev.plans];
+      updatedPlans.splice(index, 1);
+      return {
+        ...prev,
+        plans: updatedPlans
+      };
+    });
+    
+    toast({
+      description: "Plano removido com sucesso"
+    });
   };
 
   const renderStepContent = () => {
@@ -465,6 +479,17 @@ const Onboarding = () => {
               <div className="space-y-6">
                 {academyData.plans.map((plan, index) => (
                   <div key={index} className="p-4 border border-border rounded-lg">
+                    <div className="flex justify-between items-start mb-4">
+                      <h4 className="font-medium">Plano {index + 1}</h4>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 text-destructive"
+                        onClick={() => handleRemovePlan(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-1">Nome do Plano *</label>
